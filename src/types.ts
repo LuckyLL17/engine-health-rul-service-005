@@ -41,11 +41,20 @@ export type Engine = {
   lastAssessmentAt?: string;
 };
 
+export type Staleness = {
+  reason: 'maintenance_recorded';
+  maintenanceEventId: string;
+  maintenanceOccurredAt: string;
+  component: Component;
+  markedAt: string;
+  message: string;
+};
+
 export type Anomaly = {
   id: string;
   engineId: string;
   timestamp: string;
-  type: 'range_violation' | 'sensor_spike' | 'sensor_drift' | 'missing_interval' | 'phase_mismatch' | 'degradation';
+  type: 'range_violation' | 'sensor_spike' | 'sensor_drift' | 'missing_interval' | 'phase_mismatch' | 'degradation' | 'assessment_stale' | 'prediction_invalid';
   severity: 'low' | 'medium' | 'high';
   sensor?: string;
   message: string;
@@ -79,6 +88,8 @@ export type HealthAssessment = {
   componentRisks: ComponentRisk[];
   anomalies: Anomaly[];
   explanation: string[];
+  fresh: boolean;
+  staleness?: Staleness;
 };
 
 export type RulPrediction = {
@@ -94,6 +105,8 @@ export type RulPrediction = {
   limitingComponent: Component;
   riskByHorizon: Array<{ cycle: number; healthScore: number; probabilityOfMaintenance: number }>;
   evidence: string[];
+  fresh: boolean;
+  staleness?: Staleness;
 };
 
 export type ReplayJob = {
