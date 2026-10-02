@@ -20,6 +20,14 @@
 - 维护窗口推演
 - 模型版本比较
 - 告警事件、审计轨迹和本地结果导出
+- 维护事件写入后旧健康评估/RUL 自动标记失效（`superseded`），重算前不再作为有效结果返回
+
+## 维护事件与评估失效
+
+- `POST /api/maintenance-events` 成功写入后，该发动机维护前的健康评估与 RUL 预测会在**同一原子提交**中被标记为 `lifecycle: "superseded"`，并记录维护事件 ID、发生时间和失效原因；审计中同时留下 `maintenance_event` 与 `assessment_prediction_invalidated` 两条轨迹。
+- 发动机详情 `GET /api/engines/:id` 返回 `healthFreshness`（评估/预测状态、失效原因、重算建议）；`GET /api/engines/:id/risk-events` 每条异常都会带 `assessmentStale` 标注。
+- 失效期间 `rul-prediction` 与 `maintenance-simulation` 返回 422（`*_stale_recompute_required`），防止继续使用维护前结果。重新运行健康评估会自动纳入全部维护历史（`maintenanceEventsConsidered` 见审计），新结果恢复为 `current`。
+- 所有读取接口均为纯读取，不写盘、不写审计；写入类接口使用内存事务 + 临时文件原子替换，落盘失败自动回滚，不产生半条状态。
 
 ## 运行
 

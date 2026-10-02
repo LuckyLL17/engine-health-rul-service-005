@@ -1,4 +1,21 @@
 export type FlightPhase = 'taxi' | 'takeoff' | 'climb' | 'cruise' | 'descent' | 'landing';
+export type SnapshotLifecycle = 'current' | 'superseded';
+
+export type SupersededReason = {
+  code: 'maintenance_event' | 'new_assessment' | 'new_prediction';
+  at: string;
+  message: string;
+  maintenanceEventId?: string;
+  maintenanceOccurredAt?: string;
+};
+
+export type HealthFreshness = {
+  assessmentState: SnapshotLifecycle | 'missing';
+  predictionState: SnapshotLifecycle | 'missing';
+  stale: boolean;
+  staleReasons: SupersededReason[];
+  recommendation: string;
+};
 export type EngineStatus = 'healthy' | 'watch' | 'degraded' | 'critical';
 export type Component = 'hot_section' | 'compressor' | 'bearing' | 'lubrication';
 
@@ -79,6 +96,9 @@ export type HealthAssessment = {
   componentRisks: ComponentRisk[];
   anomalies: Anomaly[];
   explanation: string[];
+  lifecycle?: SnapshotLifecycle;
+  supersededAt?: string;
+  supersededReason?: SupersededReason;
 };
 
 export type RulPrediction = {
@@ -94,6 +114,9 @@ export type RulPrediction = {
   limitingComponent: Component;
   riskByHorizon: Array<{ cycle: number; healthScore: number; probabilityOfMaintenance: number }>;
   evidence: string[];
+  lifecycle?: SnapshotLifecycle;
+  supersededAt?: string;
+  supersededReason?: SupersededReason;
 };
 
 export type ReplayJob = {
